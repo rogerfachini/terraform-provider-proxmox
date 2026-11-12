@@ -59,6 +59,8 @@ func checkDeletedOspfFields(state, plan *ospfModel) []string {
 		toDelete = append(toDelete, "area")
 	}
 
+	toDelete = append(toDelete, checkDeletedFields(state.getGenericModel(), plan.getGenericModel())...)
+
 	return toDelete
 }
 

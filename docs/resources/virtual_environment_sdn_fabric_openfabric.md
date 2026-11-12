@@ -28,3 +28,4 @@ OpenFabric Fabric in Proxmox SDN. Fabrics in Proxmox VE SDN provide automated ro
 - `hello_interval` (Number) The hello_interval property for OpenFabric.
 - `ip6_prefix` (String) IPv6 prefix cidr for the fabric.
 - `ip_prefix` (String) IPv4 prefix cidr for the fabric.
+- `route_filter` (String) The identifier of an SDN prefix list (see `proxmox_sdn_prefix_list`) that filters which routes learned through the fabric are installed into the kernel routing table. When unset, only routes within the fabric's own prefix are installed.

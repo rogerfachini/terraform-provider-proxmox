@@ -26,3 +26,4 @@ OSPF Fabric in Proxmox SDN. Fabrics in Proxmox VE SDN provide automated routing 
 
 - `area` (String) OSPF area. Either a IPv4 address or a 32-bit number. Gets validated in rust.
 - `ip_prefix` (String) IPv4 prefix cidr for the fabric.
+- `route_filter` (String) The identifier of the SDN prefix list that filters which routes learned through the fabric are installed into the kernel routing table.

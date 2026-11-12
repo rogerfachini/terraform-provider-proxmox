@@ -73,6 +73,11 @@ func genericDataSourceAttributesWith(extraAttributes map[string]schema.Attribute
 			Description: "The unique identifier of the SDN fabric.",
 			Required:    true,
 		},
+		"route_filter": schema.StringAttribute{
+			Description: "The identifier of the SDN prefix list that filters which routes learned through the fabric " +
+				"are installed into the kernel routing table.",
+			Computed: true,
+		},
 	}
 
 	// Add extra attributes, allowing them to override generic ones if needed

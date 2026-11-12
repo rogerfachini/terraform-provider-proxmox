@@ -12,14 +12,17 @@ import (
 	"fmt"
 	"maps"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/bpg/terraform-provider-proxmox/fwprovider/attribute"
 	"github.com/bpg/terraform-provider-proxmox/fwprovider/config"
 	customtypes "github.com/bpg/terraform-provider-proxmox/fwprovider/types"
 	"github.com/bpg/terraform-provider-proxmox/fwprovider/validators"
@@ -30,17 +33,20 @@ import (
 )
 
 type genericModel struct {
-	ID types.String `tfsdk:"id"`
+	ID          types.String `tfsdk:"id"`
+	RouteFilter types.String `tfsdk:"route_filter"`
 }
 
-func (m *genericModel) fromAPI(name string, _ *fabrics.FabricData, _ *diag.Diagnostics) {
+func (m *genericModel) fromAPI(name string, data *fabrics.FabricData, _ *diag.Diagnostics) {
 	m.ID = types.StringValue(name)
+	m.RouteFilter = m.handleDeletedStringValue(data.RouteFilter)
 }
 
 func (m *genericModel) toAPI(_ context.Context, _ *diag.Diagnostics) *fabrics.Fabric {
 	data := &fabrics.Fabric{}
 
 	data.ID = m.ID.ValueString()
+	data.RouteFilter = attribute.StringPtrFromValue(m.RouteFilter)
 
 	return data
 }
@@ -75,8 +81,10 @@ func (m *genericModel) handleDeletedIPCIDRValue(value *string) customtypes.IPCID
 	return customtypes.NewIPCIDRValue(*value)
 }
 
-func checkDeletedFields(_, _ *genericModel) []string {
+func checkDeletedFields(state, plan *genericModel) []string {
 	var toDelete []string
+
+	attribute.CheckDelete(plan.RouteFilter, state.RouteFilter, &toDelete, "route_filter")
 
 	return toDelete
 }
@@ -91,6 +99,17 @@ func genericAttributesWith(extraAttributes map[string]schema.Attribute) map[stri
 				stringplanmodifier.RequiresReplace(),
 			},
 			Validators: validators.SDNID(),
+		},
+		"route_filter": schema.StringAttribute{
+			Description: "The identifier of an SDN prefix list that filters which routes learned through the fabric " +
+				"are installed into the kernel routing table.",
+			MarkdownDescription: "The identifier of an SDN prefix list (see `proxmox_sdn_prefix_list`) that filters " +
+				"which routes learned through the fabric are installed into the kernel routing table. " +
+				"When unset, only routes within the fabric's own prefix are installed.",
+			Optional: true,
+			Validators: []validator.String{
+				stringvalidator.LengthAtLeast(1),
+			},
 		},
 	}
 

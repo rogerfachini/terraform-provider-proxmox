@@ -22,6 +22,9 @@ type Fabric struct {
 	IPv4Prefix *string `json:"ip_prefix,omitempty"  url:"ip_prefix,omitempty"`
 	LockToken  *string `json:"lock_token,omitempty" url:"lock_token,omitempty"`
 
+	// OSPF and OpenFabric
+	RouteFilter *string `json:"route_filter,omitempty" url:"route_filter,omitempty"`
+
 	// OSPF
 	Area *string `json:"area,omitempty" url:"area,omitempty"`
 
