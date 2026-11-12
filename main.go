@@ -189,6 +189,7 @@ import (
 //go:generate cp ./build/docs-gen/resources/sdn_fabric_node_ospf.md ./docs/resources/
 //go:generate cp ./build/docs-gen/resources/sdn_fabric_openfabric.md ./docs/resources/
 //go:generate cp ./build/docs-gen/resources/sdn_fabric_ospf.md ./docs/resources/
+//go:generate cp ./build/docs-gen/resources/sdn_prefix_list.md ./docs/resources/
 //go:generate cp ./build/docs-gen/resources/sdn_subnet.md ./docs/resources/
 //go:generate cp ./build/docs-gen/resources/sdn_vnet.md ./docs/resources/
 //go:generate cp ./build/docs-gen/resources/sdn_zone_evpn.md ./docs/resources/

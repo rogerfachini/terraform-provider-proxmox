@@ -23,6 +23,7 @@ import (
 	"github.com/bpg/terraform-provider-proxmox/proxmox/cluster/sdn/controllers"
 	"github.com/bpg/terraform-provider-proxmox/proxmox/cluster/sdn/fabric_nodes"
 	"github.com/bpg/terraform-provider-proxmox/proxmox/cluster/sdn/fabrics"
+	"github.com/bpg/terraform-provider-proxmox/proxmox/cluster/sdn/prefix_lists"
 	"github.com/bpg/terraform-provider-proxmox/proxmox/cluster/sdn/vnets"
 	"github.com/bpg/terraform-provider-proxmox/proxmox/cluster/sdn/zones"
 	"github.com/bpg/terraform-provider-proxmox/proxmox/firewall"
@@ -99,6 +100,11 @@ func (c *Client) SDNFabrics(protocol string) *fabrics.Client {
 // SDNFabricNodes returns a client for managing the cluster's SDN fabric nodes.
 func (c *Client) SDNFabricNodes(fabricID, protocol string) *fabric_nodes.Client {
 	return &fabric_nodes.Client{Client: c, FabricID: fabricID, FabricProtocol: protocol}
+}
+
+// SDNPrefixLists returns a client for managing the cluster's SDN prefix lists.
+func (c *Client) SDNPrefixLists() *prefix_lists.Client {
+	return &prefix_lists.Client{Client: c}
 }
 
 // SDNApplier returns a client for applying the SDN's configuration.
