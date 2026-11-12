@@ -27,4 +27,14 @@ OSPF Fabric Node in Proxmox SDN. Fabrics in Proxmox VE SDN provide automated rou
 
 - `id` (String) The unique identifier of the SDN fabric node, in the format <fabric_id>/<node_id>.
 - `interface_names` (Set of String) Set of interface names associated with the fabric node.
+- `interfaces` (Attributes Set) Set of interfaces associated with the fabric node, with their per-interface OSPF options. (see [below for nested schema](#nestedatt--interfaces))
 - `ip` (String) IPv4 address for the fabric node.
+
+<a id="nestedatt--interfaces"></a>
+### Nested Schema for `interfaces`
+
+Read-Only:
+
+- `ip` (String) The IPv4 address of the interface in CIDR notation.
+- `name` (String) The name of the network interface.
+- `network_type` (String) The OSPF network type of the interface.

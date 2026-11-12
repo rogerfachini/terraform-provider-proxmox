@@ -47,6 +47,26 @@ func (d *OSPFDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 				Computed:    true,
 				CustomType:  customtypes.IPAddrType{},
 			},
+			"interfaces": schema.SetNestedAttribute{
+				Description: "Set of interfaces associated with the fabric node, with their per-interface OSPF options.",
+				Computed:    true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Description: "The name of the network interface.",
+							Computed:    true,
+						},
+						"ip": schema.StringAttribute{
+							Description: "The IPv4 address of the interface in CIDR notation.",
+							Computed:    true,
+						},
+						"network_type": schema.StringAttribute{
+							Description: "The OSPF network type of the interface.",
+							Computed:    true,
+						},
+					},
+				},
+			},
 		}),
 	}
 }

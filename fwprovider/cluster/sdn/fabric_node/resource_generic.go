@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"maps"
+	"slices"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -192,6 +193,12 @@ type fabricNodeModel interface {
 	getGenericModel() *genericModel
 }
 
+// configShapedModel is implemented by models that can express the same API state through more than one attribute.
+// shapeLike keeps the attribute the prior plan or state used and nulls the others; prior is nil on import.
+type configShapedModel interface {
+	shapeLike(prior fabricNodeModel)
+}
+
 type fabricNodeResourceConfig struct {
 	typeNameSuffix string
 	// fabricID       string
@@ -254,7 +261,7 @@ func (r *genericFabricNodeResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	r.readAndSetState(ctx, client, plan.getID(), &resp.State, &resp.Diagnostics)
+	r.readAndSetState(ctx, client, plan.getID(), plan, &resp.State, &resp.Diagnostics)
 }
 
 func (r *genericFabricNodeResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -284,7 +291,7 @@ func (r *genericFabricNodeResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	r.setModelFromFabricNode(ctx, fabricNode, &resp.State, &resp.Diagnostics)
+	r.setModelFromFabricNode(ctx, fabricNode, state, &resp.State, &resp.Diagnostics)
 }
 
 func (r *genericFabricNodeResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -308,6 +315,12 @@ func (r *genericFabricNodeResource) update(ctx context.Context, req resource.Upd
 	}
 
 	toDelete = append(toDelete, checkDeletedFields(state.getGenericModel(), plan.getGenericModel())...)
+
+	// interfaces can come from an attribute other than interface_names; never delete what is being set
+	if len(updateFabric.Interfaces) > 0 {
+		toDelete = slices.DeleteFunc(toDelete, func(k string) bool { return k == "interfaces" })
+	}
+
 	update := &fabric_nodes.FabricNodeUpdate{
 		FabricNode: *updateFabric,
 		Delete:     toDelete,
@@ -319,7 +332,7 @@ func (r *genericFabricNodeResource) update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	r.readAndSetState(ctx, client, plan.getID(), &resp.State, &resp.Diagnostics)
+	r.readAndSetState(ctx, client, plan.getID(), plan, &resp.State, &resp.Diagnostics)
 }
 
 func (r *genericFabricNodeResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -364,7 +377,7 @@ func (r *genericFabricNodeResource) ImportState(ctx context.Context, req resourc
 		return
 	}
 
-	r.setModelFromFabricNode(ctx, fabricNode, &resp.State, &resp.Diagnostics)
+	r.setModelFromFabricNode(ctx, fabricNode, nil, &resp.State, &resp.Diagnostics)
 }
 
 // Schema is required to satisfy the resource.Resource interface. It should be implemented by the specific resource.
@@ -376,6 +389,7 @@ func (r *genericFabricNodeResource) readAndSetState(
 	ctx context.Context,
 	client *fabric_nodes.Client,
 	fabricNodeID string,
+	prior fabricNodeModel,
 	state *tfsdk.State,
 	diags *diag.Diagnostics,
 ) {
@@ -397,12 +411,13 @@ func (r *genericFabricNodeResource) readAndSetState(
 		return
 	}
 
-	r.setModelFromFabricNode(ctx, fabricNode, state, diags)
+	r.setModelFromFabricNode(ctx, fabricNode, prior, state, diags)
 }
 
 func (r *genericFabricNodeResource) setModelFromFabricNode(
 	ctx context.Context,
 	fabricNode *fabric_nodes.FabricNodeData,
+	prior fabricNodeModel,
 	state *tfsdk.State,
 	diags *diag.Diagnostics,
 ) {
@@ -412,6 +427,10 @@ func (r *genericFabricNodeResource) setModelFromFabricNode(
 
 	if diags.HasError() {
 		return
+	}
+
+	if shaped, ok := readModel.(configShapedModel); ok {
+		shaped.shapeLike(prior)
 	}
 
 	diags.Append(state.Set(ctx, readModel)...)

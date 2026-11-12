@@ -99,8 +99,37 @@ func TestAccDataSourceSDNFabricNodeOSPF(t *testing.T) {
 					"ip":                "10.0.0.1",
 					"interface_names.#": "1",
 					"interface_names.0": "nic0",
+					"interfaces.#":      "1",
+					"interfaces.0.name": "nic0",
 				}),
 			),
+		}}},
+		{"read per-interface options with datasource", []resource.TestStep{{
+			Config: te.RenderConfig(`
+				resource "proxmox_sdn_fabric_ospf" "test" {
+				  id        = "dstest3"
+				  area      = "0"
+				  ip_prefix = "10.0.0.0/16"
+				}
+
+				resource "proxmox_sdn_fabric_node_ospf" "test_node" {
+				  fabric_id  = proxmox_sdn_fabric_ospf.test.id
+				  node_id    = "pve"
+				  ip         = "10.0.0.1"
+				  interfaces = [{ name = "nic0", ip = "10.0.100.1/31", network_type = "point-to-point" }]
+				}
+
+				data "proxmox_sdn_fabric_node_ospf" "test_node" {
+				  fabric_id = proxmox_sdn_fabric_ospf.test.id
+				  node_id   = proxmox_sdn_fabric_node_ospf.test_node.node_id
+				}
+			`),
+			Check: ResourceAttributes("data.proxmox_sdn_fabric_node_ospf.test_node", map[string]string{
+				"interfaces.#":              "1",
+				"interfaces.0.name":         "nic0",
+				"interfaces.0.ip":           "10.0.100.1/31",
+				"interfaces.0.network_type": "point-to-point",
+			}),
 		}}},
 	}
 
