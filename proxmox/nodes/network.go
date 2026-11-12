@@ -34,9 +34,21 @@ var reloadLock sync.Mutex
 
 // ListNetworkInterfaces retrieves a list of network interfaces for a specific nodes.
 func (c *Client) ListNetworkInterfaces(ctx context.Context) ([]*NetworkInterfaceListResponseData, error) {
+	return c.ListNetworkInterfacesOfType(ctx, "")
+}
+
+// ListNetworkInterfacesOfType retrieves the network interfaces of a specific node, filtered by PVE to the given
+// interface type (e.g. "eth", "bridge", "any_bridge"). An empty type lists all interfaces.
+func (c *Client) ListNetworkInterfacesOfType(ctx context.Context, ifaceType string) ([]*NetworkInterfaceListResponseData, error) {
 	resBody := &NetworkInterfaceListResponseBody{}
 
-	err := c.DoRequest(ctx, http.MethodGet, c.ExpandPath("network"), nil, resBody)
+	// a typed nil pointer would not compare equal to nil inside DoRequest
+	var reqBody any
+	if ifaceType != "" {
+		reqBody = &NetworkInterfaceListRequestBody{Type: &ifaceType}
+	}
+
+	err := c.DoRequest(ctx, http.MethodGet, c.ExpandPath("network"), reqBody, resBody)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get network interfaces for node \"%s\": %w", c.NodeName, err)
 	}

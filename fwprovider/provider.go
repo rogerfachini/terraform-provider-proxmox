@@ -775,6 +775,7 @@ func (p *proxmoxProvider) DataSources(_ context.Context) []func() datasource.Dat
 		backup.NewDataSource,
 		cephstatus.NewDataSource, // proxmox_ceph_status
 		datastores.NewDataSource,
+		network.NewInterfacesDataSource,
 		datastores.NewShortDataSource,
 		nodeconfig.NewNodeConfigDataSource,
 		nodeHardware.NewPCIDataSource,

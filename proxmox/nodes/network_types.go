@@ -22,6 +22,7 @@ type NetworkInterfaceListResponseData struct {
 	// BridgeFD        *int              `json:"bridge_fd,omitempty"`
 
 	Active             *types.CustomBool `json:"active,omitempty"`
+	Altnames           []string          `json:"altnames,omitempty"`
 	Address            *string           `json:"address,omitempty"`
 	Address6           *string           `json:"address6,omitempty"`
 	Autostart          *types.CustomBool `json:"autostart,omitempty"`
@@ -44,11 +45,18 @@ type NetworkInterfaceListResponseData struct {
 	MethodIPv6         *string           `json:"method6,omitempty"`
 	MTU                *string           `json:"mtu,omitempty"`
 	Netmask            *string           `json:"netmask,omitempty"`
+	Options            []string          `json:"options,omitempty"`
+	Options6           []string          `json:"options6,omitempty"`
 	Slaves             *string           `json:"slaves,omitempty"`
 	VLANID             *string           `json:"vlan-id,omitempty"`
 	VLANRawDevice      *string           `json:"vlan-raw-device,omitempty"`
 	Priority           int               `json:"priority"`
 	Type               string            `json:"type"`
+}
+
+// NetworkInterfaceListRequestBody contains the query parameters for a node network interface list request.
+type NetworkInterfaceListRequestBody struct {
+	Type *string `json:"type,omitempty" url:"type,omitempty"`
 }
 
 // NetworkInterfaceCreateUpdateRequestBody contains the body for a node network interface create / update request.

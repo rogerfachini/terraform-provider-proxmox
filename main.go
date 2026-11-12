@@ -53,6 +53,7 @@ import (
 //go:generate cp ./build/docs-gen/data-sources/virtual_environment_file.md ./docs/data-sources/
 //go:generate cp ./build/docs-gen/data-sources/file.md ./docs/data-sources/
 //go:generate cp ./build/docs-gen/data-sources/files.md ./docs/data-sources/
+//go:generate cp ./build/docs-gen/data-sources/network_interfaces.md ./docs/data-sources/
 //go:generate cp ./build/docs-gen/data-sources/node_config.md ./docs/data-sources/
 //go:generate cp ./build/docs-gen/data-sources/hardware_pci.md ./docs/data-sources/
 //go:generate cp ./build/docs-gen/data-sources/hagroup.md ./docs/data-sources/
